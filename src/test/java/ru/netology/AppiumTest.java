@@ -1,22 +1,24 @@
 package ru.netology;
 
+import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.MobileElement;
 import io.appium.java_client.android.AndroidDriver;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.openqa.selenium.By;
 import org.openqa.selenium.remote.DesiredCapabilities;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
+import ru.netology.screens.MainScreen;
+import ru.netology.screens.ShowTextScreen;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 
 public class AppiumTest {
 
-    private AndroidDriver<MobileElement> driver;
+    private AppiumDriver<MobileElement> driver;
+    private MainScreen mainScreen;
+    private ShowTextScreen showTextScreen;
 
     @BeforeEach
     public void setUp() throws MalformedURLException {
@@ -29,46 +31,29 @@ public class AppiumTest {
 
         URL remoteUrl = new URL("http://127.0.0.1:4723/");
         driver = new AndroidDriver<>(remoteUrl, desiredCapabilities);
+
+        mainScreen = new MainScreen(driver);
+        showTextScreen = new ShowTextScreen(driver);
     }
 
     @Test
     public void testChangeTextEmptyString() {
+        String initialText = mainScreen.textToBeChanged.getText();
 
-        MobileElement textToBeChanged = driver.findElementById("ru.netology.testing.uiautomator:id/textToBeChanged");
-        String initialText = textToBeChanged.getText();
+        mainScreen.userInput.sendKeys("   ");
+        mainScreen.buttonChange.click();
 
-
-        MobileElement userInput = driver.findElementById("ru.netology.testing.uiautomator:id/userInput");
-        userInput.sendKeys("   ");
-
-
-        MobileElement buttonChange = driver.findElementById("ru.netology.testing.uiautomator:id/buttonChange");
-        buttonChange.click();
-
-
-        MobileElement resultText = driver.findElementById("ru.netology.testing.uiautomator:id/textToBeChanged");
-        Assertions.assertEquals(initialText, resultText.getText());
+        Assertions.assertEquals(initialText, mainScreen.textToBeChanged.getText());
     }
 
     @Test
     public void testOpenTextInNewActivity() {
         String textToSet = "Netology Appium Test";
 
+        mainScreen.userInput.sendKeys(textToSet);
+        mainScreen.buttonActivity.click();
 
-        MobileElement userInput = driver.findElementById("ru.netology.testing.uiautomator:id/userInput");
-        userInput.sendKeys(textToSet);
-
-
-        MobileElement buttonActivity = driver.findElementById("ru.netology.testing.uiautomator:id/buttonActivity");
-        buttonActivity.click();
-
-
-        WebDriverWait wait = new WebDriverWait(driver, 10);
-        MobileElement activityText = (MobileElement) wait.until(
-                ExpectedConditions.visibilityOfElementLocated(By.id("ru.netology.testing.uiautomator:id/text"))
-        );
-
-        Assertions.assertEquals(textToSet, activityText.getText());
+        Assertions.assertEquals(textToSet, showTextScreen.text.getText());
     }
 
     @AfterEach
